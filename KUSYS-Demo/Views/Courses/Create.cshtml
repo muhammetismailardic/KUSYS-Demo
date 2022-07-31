@@ -1,0 +1,98 @@
+﻿@model KUSYS_Demo.Models.Student_Course
+@{
+    ViewData["Title"] = "Endroll a Student";
+}
+
+<h1>Enroll a Student to a Course</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label class="control-label">Course Name</label>
+                <select asp-for="CourseId" class="form-control form-select" asp-items="@(new SelectList(ViewBag.courses,"Id", "CourseName"))">
+                    <option value="-1">Choose a Course</option>
+                </select>
+                <span asp-validation-for="CourseId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Student Name</label>
+                <select asp-for="StudentId" class="form-control form-select" asp-items="@(new SelectList(ViewBag.students,"Id", "FullName"))"></select>
+                <span asp-validation-for="StudentId" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <button type="button" class="btn btn-outline-success float-right" id="btnCreate">Enroll</button>
+                <a class="btn btn-outline-danger" asp-action="Index">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+    }
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            
+            // Catch course id when selection is changed.
+            // Course id used to get related to course.
+            var _courseId;
+            $("#CourseId").change(function() {
+                _courseId=$("#CourseId").val();
+                
+                getList();
+            });
+
+            // Get Student list by course id,using ajax call
+            var getList = function() {
+                $.ajax({
+                    url: '@Url.Action("GetStudentListByCourseId", "Courses")',
+                    type: 'GET',
+                    data: {
+                        CourseId: _courseId,
+                    },
+                    success: function(data) {
+                        // Remove previous list to add new list.
+                        $('#StudentId').find('option').remove()
+                        if(data && data =="") alert("All Student Registered For This Course!");
+                       
+                        //append new list to select list
+                        $(data).each(
+                            function(index, item) {
+                                $('#StudentId').append('<option value="' + item.studentId + '">' + item.fullName + '</option>')
+                            });
+                    },
+                    error: function() {
+                    }
+                });
+            }
+
+            // enroll selected student to selected course.
+            $("#btnCreate").click(function() {
+                    var data = {
+                        CourseId: _courseId,
+                        StudentId: $("#StudentId").val(),
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: "/Courses/Create",
+                        data: { student_Course: data },
+                        success: function(data) {
+                           location.href = "/Courses/Index"
+                        },
+                        error: function(data) {
+                        }
+                    });
+            });
+        });
+    </script>
+    }

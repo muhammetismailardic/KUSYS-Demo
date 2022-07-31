@@ -1,0 +1,116 @@
+﻿@model IEnumerable<KUSYS_Demo.Models.Student>
+
+@{
+    ViewData["Title"] = "Students Index Page";
+}
+
+<h1>Student Index Page</h1>
+
+<p>
+    <a class="btn btn-outline-success" asp-action="Create">Create New Student</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th hidden>
+                @Html.DisplayNameFor(model => model.StudentId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BirthDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.User)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedAt)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td hidden>
+                    @Html.DisplayFor(modelItem => item.StudentId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BirthDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.User.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedAt)
+                </td>
+                <td>
+                    <a class="btn btn-outline-warning" asp-action="Edit" asp-route-id="@item.StudentId">Edit</a>
+                    <a class="btnDetails btn btn-outline-info" data-id="@item.StudentId" data-bs-toggle="modal" data-bs-target="#showStudentDetails">Details</a>
+                    <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@item.StudentId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div id="showStudentDetails" class="modal" tabindex="-1" role="dialog" ">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h4 class="modal-title">Student Details</h4>
+            </div>
+            <div class="modal-body">
+                <div id="details"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+<script type="text/javascript">
+    $(document).ready(function() {
+        // Catch link data id to get student details.
+        $("a").click(function() {
+            var currentid = $(this).data("id");
+            getList(currentid);
+        });
+
+        //Get student details
+        var getList = function(id) {
+            $.ajax({
+                url: '@Url.Action("GetStudentDetails", "Students")',
+                type: 'GET',
+                data: {
+                    StudentId: id
+                },
+                success: function(data) {
+                    $(data).each(
+                        function(index, item) {
+                            $('#details').find('label').remove()
+                            $('#details').find('br').remove()
+                            $('#details').append('<label>' +'<b>Firstname:</b> '+ item.firstName + '</label><br>')
+                            $('#details').append('<label>' +'<b>Lastname: </b>'+ item.lastName + '</label><br>')
+                            $('#details').append('<label>' +'<b>Birthdate:</b> '+ item.birthDate + '</label><br>')
+                        });
+                },
+                error: function() {
+                }
+            });
+        }
+    });
+</script>
+}
